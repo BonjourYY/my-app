@@ -1,3 +1,5 @@
+import Parent from "@/app/_components/parent";
+
 export default function ActivityA() {
-  return <div>活动A</div>;
+  return <Parent />;
 }
