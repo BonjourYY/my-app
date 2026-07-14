@@ -3,20 +3,64 @@ import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { db } from "../db";
 import * as schema from "../db/schema";
 import { APIError } from "better-auth";
+import { customSession } from "better-auth/plugins";
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, { provider: "pg", schema }),
 
 
 
-  plugins: [],
+  user: {
+    changeEmail: {
+      enabled: true,
+      sendChangeEmailConfirmation: async ({ url }) => {
+        console.log('旧邮箱验证');
+        console.log(url)
+      },
+      updateEmailWithoutVerification:true,
+    },
+    deleteUser: {
+      enabled: true,
+      beforeDelete: async (user, ctx) => {
+        console.log('不允许删除');
+        throw new APIError("BAD_REQUEST");
+      },
+    }
+  },
+
+
+  session: {
+    deferSessionRefresh: true,
+    cookieCache: {
+      enabled: true,
+      maxAge: 60,
+      strategy:"jwt"
+    },
+  },
+
+
+  rateLimit: {
+    enabled: true,
+    storage:'database'
+  },
+
+
+
+  plugins: [
+    customSession(async ({user, session}) => {
+      return {
+        user,session,a:1
+      }
+    })
+  ],
 
   advanced: {
     database: {
       generateId: "uuid",
     },
-    useSecureCookies: true,
+    // useSecureCookies: true,
   },
+
 
   databaseHooks: {
     user: {
@@ -43,8 +87,9 @@ export const auth = betterAuth({
 
 
   emailVerification: {
-    sendVerificationEmail: async ({ user, url, token }, request) => {
-      console.log(user, url, token)
+    sendVerificationEmail: async ({  url }) => {
+      console.log('新邮箱验证')
+      console.log(url)
     },
     sendOnSignUp: true,
     sendOnSignIn:true,
@@ -54,6 +99,9 @@ export const auth = betterAuth({
     enabled: true,
     requireEmailVerification:true,
   },
+
+
+
 
 
 
@@ -70,6 +118,9 @@ export const auth = betterAuth({
   //   }
   // }
 });
+
+
+type session  = typeof auth.$Infer.Session
 
 
 // auth.api.signUpEmail({
