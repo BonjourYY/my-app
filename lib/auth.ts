@@ -3,55 +3,55 @@ import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { db } from "../db";
 import * as schema from "../db/schema";
 import { APIError } from "better-auth";
-import { customSession } from "better-auth/plugins";
+import { admin as adminPlugin, customSession } from "better-auth/plugins";
+import { nextCookies } from "better-auth/next-js";
+import { ac, admin } from "@/app/config/permissions";
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, { provider: "pg", schema }),
-
-
 
   user: {
     changeEmail: {
       enabled: true,
       sendChangeEmailConfirmation: async ({ url }) => {
-        console.log('旧邮箱验证');
-        console.log(url)
+        console.log("旧邮箱验证");
+        console.log(url);
       },
-      updateEmailWithoutVerification:true,
+      updateEmailWithoutVerification: true,
     },
     deleteUser: {
       enabled: true,
       beforeDelete: async (user, ctx) => {
-        console.log('不允许删除');
+        console.log("不允许删除");
         throw new APIError("BAD_REQUEST");
       },
-    }
+    },
   },
-
 
   session: {
     deferSessionRefresh: true,
     cookieCache: {
       enabled: true,
       maxAge: 60,
-      strategy:"jwt"
+      strategy: "jwt",
     },
   },
 
-
   rateLimit: {
     enabled: true,
-    storage:'database'
+    storage: "database",
   },
 
-
-
   plugins: [
-    customSession(async ({user, session}) => {
+    customSession(async ({ user, session }) => {
       return {
-        user,session,a:1
-      }
-    })
+        user,
+        session,
+        a: 1,
+      };
+    }),
+    adminPlugin({ ac, roles: { admin } }),
+    nextCookies(),
   ],
 
   advanced: {
@@ -61,52 +61,41 @@ export const auth = betterAuth({
     // useSecureCookies: true,
   },
 
-
   databaseHooks: {
     user: {
       create: {
-        before: async (user,ctx) => {
-          console.log('开始创建')
-          console.log(ctx)
+        before: async (user, ctx) => {
+          console.log("开始创建");
         },
         after: async () => {
-          console.log('创建完成')
-        }
+          console.log("创建完成");
+        },
       },
     },
     session: {
       create: {
         after: async () => {
-          console.log('session 创建完成')
-        }
-      }
-    }
+          console.log("session 创建完成");
+        },
+      },
+    },
   },
 
   experimental: { joins: true },
 
-
   emailVerification: {
-    sendVerificationEmail: async ({  url }) => {
-      console.log('新邮箱验证')
-      console.log(url)
+    sendVerificationEmail: async ({ url }) => {
+      console.log("新邮箱验证");
+      console.log(url);
     },
     sendOnSignUp: true,
-    sendOnSignIn:true,
+    sendOnSignIn: true,
   },
 
   emailAndPassword: {
     enabled: true,
-    requireEmailVerification:true,
+    requireEmailVerification: true,
   },
-
-
-
-
-
-
-
-
 
   // user: {
   //   additionalFields: {
@@ -119,9 +108,7 @@ export const auth = betterAuth({
   // }
 });
 
-
-type session  = typeof auth.$Infer.Session
-
+type session = typeof auth.$Infer.Session;
 
 // auth.api.signUpEmail({
 //   body: {

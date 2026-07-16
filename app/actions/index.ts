@@ -72,3 +72,144 @@ export const verifyPassword = async (
     return { ok: false, message: "服务异常，请稍后重试。" };
   }
 };
+
+export const signIn = async () => {
+  await auth.api.signInEmail({
+    body: { email: "fqymtu@gmail.com", password: "fqy1028511" },
+    headers: await headers(),
+  });
+};
+
+export const createUser = async () => {
+  await auth.api.createUser({
+    body: {
+      name: "范庆云",
+      email: "1685360590@qq.com",
+      password: "fqy1028511",
+      role: "user",
+    },
+    headers: await headers(),
+  });
+};
+
+export const listUsers = async () => {
+  const result = await auth.api.listUsers({
+    query: {
+      limit: 1,
+      offset: 1,
+    },
+    headers: await headers(),
+  });
+  console.log(result);
+};
+
+export const getUser = async () => {
+  try {
+    await auth.api.getUser({
+      // 用一个不存在的 id 来模拟 404 失败；换成真实 id 即成功
+      query: { id: "00000000-0000-0000-0000-000000000000" },
+      headers: await headers(),
+    });
+  } catch (error) {
+    if (isAPIError(error)) {
+      console.log(error);
+    }
+  }
+};
+
+export const setRole = async (role: "admin" | "admin"[], userId: string) => {
+  await auth.api.setRole({
+    body: { role, userId },
+    headers: await headers(),
+  });
+};
+
+export const setUserPassword = async (newPassword: string, userId: string) => {
+  await auth.api.setUserPassword({
+    body: { newPassword, userId },
+    headers: await headers(),
+  });
+};
+
+export const updateUser = async (name: string, userId: string) => {
+  await auth.api.adminUpdateUser({
+    body: {
+      userId,
+      data: { name },
+    },
+    headers: await headers(),
+  });
+};
+
+export const banUser = async (userId: string) => {
+  await auth.api.banUser({
+    body: {
+      userId,
+      banReason: "看你不爽",
+      banExpiresIn: 60,
+    },
+    headers: await headers(),
+  });
+};
+
+export const unbanUser = async (userId: string) => {
+  await auth.api.unbanUser({
+    body: { userId },
+    headers: await headers(),
+  });
+};
+
+export const listUserSessions = async (userId: string) => {
+  const result = await auth.api.listUserSessions({
+    body: { userId },
+    headers: await headers(),
+  });
+  console.log(result);
+};
+
+export const revokeUserSession = async (sessionToken: string) => {
+  await auth.api.revokeUserSession({
+    body: { sessionToken },
+    headers: await headers(),
+  });
+};
+
+export const revokeUserSessions = async (userId: string) => {
+  await auth.api.revokeUserSessions({
+    body: { userId },
+    headers: await headers(),
+  });
+};
+
+export const impersonateUser = async (userId: string) => {
+  await auth.api.impersonateUser({
+    body: { userId },
+    headers: await headers(),
+  });
+};
+
+export const stopImpersonation = async () => {
+  await auth.api.stopImpersonating({
+    headers: await headers(),
+  });
+};
+
+export const removeUser = async (userId: string) => {
+  await auth.api.removeUser({
+    body: { userId },
+    headers: await headers(),
+  });
+};
+
+export const userHasPermission = async (
+  userId: string,
+  permissions: Record<string, string[]>,
+) => {
+  const result = await auth.api.userHasPermission({
+    body: { userId, permissions },
+    // headers: await headers(),
+  });
+  // result.success 就是权限判断结果：true = 有权限，false = 没权限
+  // return result.success;
+  console.log(result);
+};
