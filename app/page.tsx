@@ -22,6 +22,7 @@ import {
   userHasPermission,
   verifyPassword,
 } from "./actions";
+import { client } from "@/rpc/orpc-link";
 
 export default function Home() {
   let [obj, setObj] = useState({});
@@ -124,6 +125,11 @@ export default function Home() {
     await authClient.deleteUser();
   };
 
+  const testORPC = async () => {
+    const res = await client.project.list({ id: 1, name: "jackfan" });
+    console.log("testORPC 结果:", res);
+  };
+
   return (
     <>
       <div className="flex gap-2 mt-4">
@@ -216,6 +222,9 @@ export default function Home() {
         >
           Check Permission
         </Button>
+      </div>
+      <div className="flex-wrap flex gap-2 mt-4">
+        <Button onPress={testORPC}>测试 ORPC</Button>
       </div>
       <pre>{JSON.stringify(obj, null, 2)}</pre>
     </>
